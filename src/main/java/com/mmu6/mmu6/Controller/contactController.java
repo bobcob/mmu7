@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,7 +29,7 @@ import com.mmu6.mmu6.Respiritory.userRepository;
 
 @RestController
 @RequestMapping("/api/contacts")
-@CrossOrigin(origins = "http://localhost:19006")
+@CrossOrigin(origins = "http://localhost:19007")
 public class contactController {
     @Autowired
     private userContactRespiritory userContactRespiritory;
@@ -36,7 +37,7 @@ public class contactController {
     private userRepository userRepository;
     
     @GetMapping("/{id}")
-    public   ResponseEntity<List<Contact>> getAllEmployees(@PathVariable int id , @RequestHeader("X-Authorization") String auth, @RequestHeader("Uid") Long uid) throws AuthenticationException {
+    public   ResponseEntity<List<Contact>> getAllContacts(@PathVariable int id , @RequestHeader("X-Authorization") String auth, @RequestHeader("Uid") Long uid) throws AuthenticationException {
         Authentication(auth , uid);
     	List<Contact> userList = new ArrayList<>();
     	List<userContacts> userContactsList =  userContactRespiritory.findAllByUser1ID(id);
@@ -74,6 +75,26 @@ public class contactController {
         
         data.put("success", "Contact added");
         return ResponseEntity.status(HttpStatus.OK).body(data.toString());
+    }
+    
+    @Transactional
+    @DeleteMapping("/")
+    public ResponseEntity<String> deleteContact (@RequestBody userContacts deleteContact , @RequestHeader("X-Authorization") String auth, @RequestHeader("Uid") Long uid) throws AuthenticationException {
+    	JSONObject data = new JSONObject();
+    	Authentication(auth , uid);
+    	Optional<userContacts> existingContact = userContactRespiritory.findByUser1IDAndUser2ID(deleteContact.getUser1ID(), deleteContact.getUser2ID());
+    	if (existingContact.isPresent()) {
+    		userContactRespiritory.deleteByUser1IDAndUser2ID(deleteContact.getUser1ID(), deleteContact.getUser2ID());
+    		userContactRespiritory.deleteByUser1IDAndUser2ID(deleteContact.getUser2ID(), deleteContact.getUser1ID());
+    		data.put("success", "contact deleted");
+    		return ResponseEntity.status(HttpStatus.OK).body(data.toString());
+    	}
+    	
+    	data.put("error", "user could not be deleted");
+    	return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(data.toString());
+    	
+    	
+   
     }
     
     public String Authentication(String auth , Long id) throws AuthenticationException {

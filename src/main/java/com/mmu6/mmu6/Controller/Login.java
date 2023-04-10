@@ -22,7 +22,7 @@ import org.json.JSONObject;
 
 @RestController
 @RequestMapping("/api/login")
-@CrossOrigin(origins = "http://localhost:19006")
+@CrossOrigin(origins = "http://localhost:19007")
 public class Login {
     @Autowired
     private userRepository userRepository;
