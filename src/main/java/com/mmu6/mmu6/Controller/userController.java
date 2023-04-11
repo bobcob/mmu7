@@ -34,8 +34,8 @@ public class userController {
     private userRepository userRepository;
     
     @PutMapping("/")
-    public ResponseEntity<String> updateUser(@RequestBody User newUser , @RequestHeader("X-Authorization") String auth, @RequestHeader("Uid") Long uid) {
-    	//AUTH
+    public ResponseEntity<String> updateUser(@RequestBody User newUser , @RequestHeader("X-Authorization") String auth, @RequestHeader("Uid") Long uid) throws AuthenticationException {
+    	Authentication(auth , uid);
     	JSONObject data = new JSONObject();
     	Optional<User> user = userRepository.findById(newUser.getId());
     	if (user.isPresent()) {
@@ -46,13 +46,13 @@ public class userController {
     	}
     	else {
     		data.put("error", "user not updated");
-    		return ResponseEntity.status(HttpStatus.OK).body(data.toString());
+    		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(data.toString());
     	}
     }
 
     @GetMapping("/{id}")
-    public Contact getUserByID(@PathVariable Long id , @RequestHeader("X-Authorization") String auth, @RequestHeader("Uid") Long uid) {
- // NEED AUTH IMPLIMENTING
+    public Contact getUserByID(@PathVariable Long id , @RequestHeader("X-Authorization") String auth, @RequestHeader("Uid") Long uid) throws AuthenticationException{
+    	Authentication(auth , uid);
 
         Optional<User> newUser = userRepository.findById(id);
         if (newUser.isPresent()) {
@@ -81,5 +81,19 @@ public class userController {
     	userRepository.deleteById(id);
     	return "User deleted";
     }
+    
+    public String Authentication(String auth , Long id) throws AuthenticationException {
+    	// passing auth enables access to api , needs to be more secure
+    	User findUser = userRepository.findByauthToken(auth);
+    	if (findUser.getId().equals(id)) {
+    		return null;
+    	}
+    	else {
+    		throw new AuthenticationException("Invalid authentication token");
+    	}
+    	
+    
+    }
 }
+
 

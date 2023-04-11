@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.mmu6.mmu6.Class.User;
@@ -24,11 +25,12 @@ import org.json.JSONObject;
 @RequestMapping("/api/login")
 @CrossOrigin(origins = "http://localhost:19007")
 public class Login {
+	
     @Autowired
     private userRepository userRepository;
 
     @PostMapping("/")
-    public ResponseEntity<String> getAllEmployees(@RequestBody User currentUser) {
+    public ResponseEntity<String> login(@RequestBody User currentUser) {
     	JSONObject data = new JSONObject();
     	User existingUser = userRepository.findByEmail(currentUser.getEmail());
     	if (existingUser != null) {
@@ -50,6 +52,8 @@ public class Login {
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(data.toString());
         
     }
+    
+
     
     private String generateAuthToken() {
         return UUID.randomUUID().toString();
