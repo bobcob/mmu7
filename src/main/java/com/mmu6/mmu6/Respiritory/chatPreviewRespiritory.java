@@ -7,12 +7,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.mmu6.mmu6.Class.Chat;
+import com.mmu6.mmu6.Class.ChatPreview;
 
 
-public interface chatRespiritory extends JpaRepository<Chat, Long> {
-	List<Chat> findAllByChatId(Long id);
+public interface chatPreviewRespiritory extends JpaRepository<ChatPreview, Long> {
 	
-	@Query(value = "SELECT * FROM chat WHERE chat_id = (?1) ORDER BY time DESC LIMIT 1", nativeQuery = true)
-    Chat findLatestMessageInChat(Long id);
+	
 
 }

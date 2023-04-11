@@ -12,7 +12,7 @@ public class ChatRelationship {
     @Column(name = "chat_id")
     private Long chatId;
 
-    private Long userID;
+    private Integer userID;
 
 	public Long getId() {
 		return id;
@@ -30,12 +30,12 @@ public class ChatRelationship {
 		this.chatId = chatId;
 	}
 
-	public Long getUserID() {
+	public Integer getUserID() {
 		return userID;
 	}
 
-	public void setUserID(Long userID) {
-		this.userID = userID;
+	public void setUserID(Integer userId2) {
+		this.userID = userId2;
 	}
 
 

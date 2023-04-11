@@ -9,7 +9,14 @@ public class ChatPreview {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long chatId;
-    private String lastMessage;
+    private String Name;
+    public String getName() {
+		return Name;
+	}
+	public void setName(String name) {
+		Name = name;
+	}
+	private String lastMessage;
     private String time;
 	public Long getChatId() {
 		return chatId;

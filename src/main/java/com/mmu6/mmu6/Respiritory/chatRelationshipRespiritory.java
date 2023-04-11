@@ -20,7 +20,11 @@ public interface chatRelationshipRespiritory extends JpaRepository<ChatRelations
     // make consistent
     
     @Query(value = "SELECT chat_id FROM chat_relationship WHERE userid IN (?1) GROUP BY chat_id HAVING COUNT(DISTINCT userid) = ?2", nativeQuery = true)
-    List<Long> findChatIdByUserIds(List<Long> userIds, int numberOfUsers);
+    List<Integer> findChatIdByUserIds(List<Integer> userIds, int numberOfUsers);
+
+	List<ChatRelationship>findAllByuserID(Integer i);
+	
+	
 
  
 }

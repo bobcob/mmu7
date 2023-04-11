@@ -49,13 +49,19 @@ public class ChatRelationships {
     public ResponseEntity<String> newChat(@RequestBody Map<String, Object> requestData) {
     	JSONObject data = new JSONObject();
         Long chatId = Long.parseLong(requestData.get("chatId").toString());
-        List<Long> userIds = (List<Long>) requestData.get("userID");
-        List<Long> chatIds = chatRelationshipRespiritory.findChatIdByUserIds(userIds, userIds.size());
-        if (!chatIds.isEmpty()) {
-        	data.put("success", "users not in chat");
+        List<Integer> userIds = (List<Integer>) requestData.get("userID");
+        List<Integer> chatIds = chatRelationshipRespiritory.findChatIdByUserIds(userIds, userIds.size());
+        if (chatIds.isEmpty()) {
+        	for (Integer userId : userIds) {
+                ChatRelationship chatRelationship = new ChatRelationship();
+                chatRelationship.setChatId(chatId);
+                chatRelationship.setUserID(userId);
+                chatRelationshipRespiritory.save(chatRelationship);
+                data.put("chat", chatId);
+            }
         	return ResponseEntity.status(HttpStatus.OK).body(data.toString());
         } else {
-        	data.put("error", "users already in chat");
+        	data.put("chat", chatIds);
         	return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(data.toString());
         } 
   
