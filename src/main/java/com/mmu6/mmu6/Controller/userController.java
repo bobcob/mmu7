@@ -51,13 +51,13 @@ public class userController {
     }
 
     @GetMapping("/{id}")
-    public Contact getUserByID(@PathVariable Long id , @RequestHeader("X-Authorization") String auth, @RequestHeader("Uid") Long uid) throws AuthenticationException{
-    	Authentication(auth , uid);
+    public Contact getUserByID(@PathVariable Long id) throws AuthenticationException{
+    //	Authentication(auth , uid);
 
         Optional<User> newUser = userRepository.findById(id);
         if (newUser.isPresent()) {
             User user = newUser.get();
-            Contact userSummary = new Contact(user.getId(), user.getName(), user.getEmail());
+            Contact userSummary = new Contact(user.getId(), user.getName(), user.getEmail() , "" , "");
             return userSummary;
         } else {
             return null;

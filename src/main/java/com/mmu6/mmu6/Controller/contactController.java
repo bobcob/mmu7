@@ -21,21 +21,25 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.mmu6.mmu6.Class.ChatRelationship;
 import com.mmu6.mmu6.Class.Contact;
 import com.mmu6.mmu6.Class.User;
 import com.mmu6.mmu6.Class.userContacts;
+import com.mmu6.mmu6.Respiritory.chatRelationshipRespiritory;
 import com.mmu6.mmu6.Respiritory.userContactRespiritory;
 import com.mmu6.mmu6.Respiritory.userRepository;
 
 @RestController
 @RequestMapping("/api/contacts")
-@CrossOrigin(origins = "http://localhost:19007")
+@CrossOrigin(origins = "*")
 public class contactController {
     @Autowired
     private userContactRespiritory userContactRespiritory;
     @Autowired
     private userRepository userRepository;
-    
+    @Autowired
+    private chatRelationshipRespiritory chatRelationshipRespiritory;
     @GetMapping("/{id}")
     public   ResponseEntity<List<Contact>> getAllContacts(@PathVariable int id , @RequestHeader("X-Authorization") String auth, @RequestHeader("Uid") Long uid) throws AuthenticationException {
         Authentication(auth , uid);
@@ -44,7 +48,25 @@ public class contactController {
     	for (userContacts userContact : userContactsList) {
     		 Optional<User> userOptional = userRepository.findById((long) userContact.getUser2ID());
     		 userOptional.ifPresent(user -> {
-    			 Contact userSummary = new Contact(user.getId(), user.getName(), user.getEmail());
+    			 Contact userSummary = new Contact(user.getId(), user.getName(), user.getEmail() , ""  , "");
+    			 userList.add(userSummary);
+    		 });
+    		        
+    	}
+    	return ResponseEntity.status(HttpStatus.OK).body(userList);
+    	
+    }
+    
+    @GetMapping("/inchat/{id}")
+    public   ResponseEntity<List<Contact>> getContactsInChat(@PathVariable long id ) {
+    	// we need to get the chat ID and return all contacts that are in the chat from the relationships table
+    	List<Contact> userList = new ArrayList<>();
+    	List<ChatRelationship> contactsInChat =  chatRelationshipRespiritory.findAllBychatId(id);
+    	for (ChatRelationship chatRelationships : contactsInChat) {
+    		 Optional<User> userOptional = userRepository.findById((long) chatRelationships.getUserID());
+    		 userOptional.ifPresent(user -> {
+    			 
+    			 Contact userSummary = new Contact(user.getId(), user.getName(), user.getEmail() ,chatRelationships.getAdmin() , chatRelationships.getGroupCreator() );
     			 userList.add(userSummary);
     		 });
     		        

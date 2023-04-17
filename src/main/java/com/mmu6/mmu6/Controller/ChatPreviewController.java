@@ -32,7 +32,7 @@ import org.json.JSONObject;
 
 @RestController
 @RequestMapping("/api/chats/preview")
-@CrossOrigin(origins = "http://localhost:19007")
+@CrossOrigin(origins = "*")
 public class ChatPreviewController {
 	
     @Autowired

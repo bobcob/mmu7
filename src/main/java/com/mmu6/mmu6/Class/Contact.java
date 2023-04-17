@@ -7,10 +7,26 @@ public class Contact {
 	private Long id;
 	private String name;
 	private String email;
+	private String Admin;
+	private String GroupCreator;
+	public String getAdmin() {
+		return Admin;
+	}
+	public void setAdmin(String admin) {
+		Admin = admin;
+	}
+	public String getGroupCreator() {
+		return GroupCreator;
+	}
+	public void setGroupCreator(String groupCreator) {
+		GroupCreator = groupCreator;
+	}
 	public Long getId() {
 		return id;
 	}
-	public Contact(Long id, String name, String email) {
+	public Contact(Long id, String name, String email, String Admin, String GroupCreator) {
+		this.GroupCreator = GroupCreator;
+		this.Admin = Admin;
         this.id = id;
         this.name = name;
         this.email = email;

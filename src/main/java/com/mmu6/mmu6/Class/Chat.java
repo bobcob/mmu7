@@ -15,8 +15,26 @@ public class Chat {
     private Long userID;
     private String message;
     private String time;
+    private String Name;
+    private String Title;
 
-    public Long getId() {
+    public String getTitle() {
+		return Title;
+	}
+
+	public void setTitle(String title) {
+		Title = title;
+	}
+
+	public String getName() {
+		return Name;
+	}
+
+	public void setName(String name) {
+		Name = name;
+	}
+
+	public Long getId() {
         return id;
     }
 

@@ -13,6 +13,37 @@ public class ChatRelationship {
     private Long chatId;
 
     private Integer userID;
+    
+    private String chatName;
+    private String Admin;
+    private String GroupCreator;
+    
+
+
+	public String getAdmin() {
+		return Admin;
+	}
+
+	public void setAdmin(String admin) {
+		Admin = admin;
+	}
+
+	public String getGroupCreator() {
+		return GroupCreator;
+	}
+
+	public void setGroupCreator(String groupCreator) {
+		GroupCreator = groupCreator;
+	}
+
+
+	public String getChatName() {
+		return chatName;
+	}
+
+	public void setChatName(String chatName) {
+		this.chatName = chatName;
+	}
 
 	public Long getId() {
 		return id;
