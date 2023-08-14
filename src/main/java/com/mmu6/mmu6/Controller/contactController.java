@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mmu6.mmu6.Class.Authentication;
 import com.mmu6.mmu6.Class.ChatRelationship;
 import com.mmu6.mmu6.Class.Contact;
 import com.mmu6.mmu6.Class.User;
@@ -29,68 +30,93 @@ import com.mmu6.mmu6.Class.userContacts;
 import com.mmu6.mmu6.Respiritory.chatRelationshipRespiritory;
 import com.mmu6.mmu6.Respiritory.userContactRespiritory;
 import com.mmu6.mmu6.Respiritory.userRepository;
-
+//utilising spring annotations to make this a rest controller
 @RestController
+//mapping the url to give request access to the class functionality
 @RequestMapping("/api/contacts")
+//allowing all requests
 @CrossOrigin(origins = "*")
-public class contactController {
+public class ContactController {
+	// using the autowired annotation , other repository's are imported with their functionality
     @Autowired
     private userContactRespiritory userContactRespiritory;
     @Autowired
     private userRepository userRepository;
     @Autowired
     private chatRelationshipRespiritory chatRelationshipRespiritory;
+    @Autowired
+	private Authentication authenticationService;
+    
     @GetMapping("/{id}")
+    // declaring a fucntion which returns a list of all contacts 
     public   ResponseEntity<List<Contact>> getAllContacts(@PathVariable int id , @RequestHeader("X-Authorization") String auth, @RequestHeader("Uid") Long uid) throws AuthenticationException {
-        Authentication(auth , uid);
+    	authenticationService.authenticate(auth, uid);
     	List<Contact> userList = new ArrayList<>();
-    	List<userContacts> userContactsList =  userContactRespiritory.findAllByUser1ID(id);
+    	List<userContacts> userContactsList =  userContactRespiritory.findAllByUser1Id(id);
+    	// returning a list of all contacts based on the user1 ids
     	for (userContacts userContact : userContactsList) {
-    		 Optional<User> userOptional = userRepository.findById((long) userContact.getUser2ID());
-    		 userOptional.ifPresent(user -> {
+    		// optional object which returns optional user based on id2
+    		 Optional<User> userOptional = userRepository.findById((long) userContact.getUser2Id());
+    		 // if it is present get it
+    		 if (userOptional.isPresent()) {
+    			 User user = userOptional.get();
+    			 // add the needed paramaters to the user sumarry object
     			 Contact userSummary = new Contact(user.getId(), user.getName(), user.getEmail() , ""  , "");
+    			 // add it to the list of contacts
     			 userList.add(userSummary);
-    		 });
+    		 }
+
     		        
     	}
+    	// return list of contacts for rendering
     	return ResponseEntity.status(HttpStatus.OK).body(userList);
     	
     }
     
+    // function that returns a list of contacts that are in the chat id given
     @GetMapping("/inchat/{id}")
-    public   ResponseEntity<List<Contact>> getContactsInChat(@PathVariable long id ) {
-    	// we need to get the chat ID and return all contacts that are in the chat from the relationships table
+    public   ResponseEntity<List<Contact>> getContactsInChat(@PathVariable long id , @RequestHeader("X-Authorization") String auth, @RequestHeader("Uid") Long uid) throws AuthenticationException {
+    	authenticationService.authenticate(auth, uid);
     	List<Contact> userList = new ArrayList<>();
+    	// find all chat relationships based on chat id
     	List<ChatRelationship> contactsInChat =  chatRelationshipRespiritory.findAllBychatId(id);
+    	// loop through all chat relationships
     	for (ChatRelationship chatRelationships : contactsInChat) {
-    		 Optional<User> userOptional = userRepository.findById((long) chatRelationships.getUserID());
-    		 userOptional.ifPresent(user -> {
-    			 
+    		// optional user object user id based on the user id in chat relationship 
+    		 Optional<User> userOptional = userRepository.findById((long) chatRelationships.getUserId());
+    		 if (userOptional.isPresent()) {
+    			 // if present get the object 
+    			 User user = userOptional.get();
+    			 // take needed details and add to list
     			 Contact userSummary = new Contact(user.getId(), user.getName(), user.getEmail() ,chatRelationships.getAdmin() , chatRelationships.getGroupCreator() );
     			 userList.add(userSummary);
-    		 });
+    		 };
     		        
     	}
+    	// return data and status code
     	return ResponseEntity.status(HttpStatus.OK).body(userList);
     	
     }
     
+    // function that creates a relationship between two contacts making them contacts with each other
     @PostMapping("/")
     public ResponseEntity<String> addContact(@RequestBody userContacts newContact , @RequestHeader("X-Authorization") String auth, @RequestHeader("Uid") Long uid) throws AuthenticationException {
+    	authenticationService.authenticate(auth, uid);
     	JSONObject data = new JSONObject();
-    	Authentication(auth , uid);
-    	Optional<userContacts> existingContact = userContactRespiritory.findByUser1IDAndUser2ID(newContact.getUser1ID(), newContact.getUser2ID());
+    	// check that sees if the two users are already existing contacts
+    	Optional<userContacts> existingContact = userContactRespiritory.findByUser1IdAndUser2Id(newContact.getUser1Id(), newContact.getUser2Id());
     	if (existingContact.isPresent()) {
+    		// if they are throw error
     		data.put("error", "Users already contacts");
     		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(data.toString());
     	}
     	
     	
-    	//succesfull request
+    	// if not create two way relationship between the two 
     	userContactRespiritory.save(newContact);
         userContacts swappedContact = new userContacts();
-        swappedContact.setUser1ID(newContact.getUser2ID());
-        swappedContact.setUser2ID(newContact.getUser1ID());
+        swappedContact.setUser1Id(newContact.getUser2Id());
+        swappedContact.setUser2Id(newContact.getUser1Id());
         swappedContact.setDateAdded(newContact.getDateAdded());
         userContactRespiritory.save(swappedContact);
         //
@@ -99,19 +125,21 @@ public class contactController {
         return ResponseEntity.status(HttpStatus.OK).body(data.toString());
     }
     
+    // function that deletes relationship between the two contacts
     @Transactional
     @DeleteMapping("/")
     public ResponseEntity<String> deleteContact (@RequestBody userContacts deleteContact , @RequestHeader("X-Authorization") String auth, @RequestHeader("Uid") Long uid) throws AuthenticationException {
+    	authenticationService.authenticate(auth, uid);
     	JSONObject data = new JSONObject();
-    	Authentication(auth , uid);
-    	Optional<userContacts> existingContact = userContactRespiritory.findByUser1IDAndUser2ID(deleteContact.getUser1ID(), deleteContact.getUser2ID());
+    	Optional<userContacts> existingContact = userContactRespiritory.findByUser1IdAndUser2Id(deleteContact.getUser1Id(), deleteContact.getUser2Id());
+    	// if the relationship is existing already delete it
     	if (existingContact.isPresent()) {
-    		userContactRespiritory.deleteByUser1IDAndUser2ID(deleteContact.getUser1ID(), deleteContact.getUser2ID());
-    		userContactRespiritory.deleteByUser1IDAndUser2ID(deleteContact.getUser2ID(), deleteContact.getUser1ID());
+    		userContactRespiritory.deleteByUser1IdAndUser2Id(deleteContact.getUser1Id(), deleteContact.getUser2Id());
+    		userContactRespiritory.deleteByUser1IdAndUser2Id(deleteContact.getUser2Id(), deleteContact.getUser1Id());
     		data.put("success", "contact deleted");
     		return ResponseEntity.status(HttpStatus.OK).body(data.toString());
     	}
-    	
+    	// if not throw error
     	data.put("error", "user could not be deleted");
     	return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(data.toString());
     	
@@ -119,18 +147,6 @@ public class contactController {
    
     }
     
-    public String Authentication(String auth , Long id) throws AuthenticationException {
-    	// passing auth enables access to api , needs to be more secure
-    	User findUser = userRepository.findByauthToken(auth);
-    	if (findUser.getId().equals(id)) {
-    		return null;
-    	}
-    	else {
-    		throw new AuthenticationException("Invalid authentication token");
-    	}
-    	
-    
-    }
     
     
 }

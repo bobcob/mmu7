@@ -13,5 +13,7 @@ import com.mmu6.mmu6.Class.ChatPreview;
 public interface chatPreviewRespiritory extends JpaRepository<ChatPreview, Long> {
 	
 	
+	
+	
 
 }

@@ -1,22 +1,25 @@
 package com.mmu6.mmu6.Class;
-
+/** Class to hold the parameters sent in the relevant request */
 public class AdminCheck {
     Integer id;
-    Long chatID;
+    /** Store id for later reference  */
+    Long chatId;
+    /** Store chatId */
 
+    /** getId allows the classes id variable to be returned */
     public Integer getId() {
         return id;
     }
-
+    /** setId allows the id variable to be set externally when the class is called */
     public void setId(Integer id) {
         this.id = id;
     }
-
-    public Long getChatID() {
-        return chatID;
+    /** getChatID allows the classes chatID variable to be returned */
+    public Long getChatId() {
+        return chatId;
     }
-
-    public void setChatID(Long chatID) {
-        this.chatID = chatID;
+    /** setChatID allows the id variable to be set externally when the class is called */
+    public void setChatID(Long chatId) {
+        this.chatId = chatId;
     }
 }
